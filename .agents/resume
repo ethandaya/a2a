@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Dependencies persist in the snapshot; no services or authentication need repair.
+# Never initialize chat keys or relay state in the shared setup snapshot.

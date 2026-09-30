@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+SECONDS=0
+
+echo "Preparing a2a toolchain"
+node --version
+package_manager="$(node -p "require('./package.json').packageManager")"
+if ! command -v pnpm >/dev/null 2>&1 || [[ "$(pnpm --version)" != "${package_manager#pnpm@}" ]]; then
+  sudo npm install --global --ignore-scripts "$package_manager"
+fi
+echo "Toolchain ready in ${SECONDS}s (pnpm $(pnpm --version))"
+
+echo "Installing locked dependencies"
+started=$SECONDS
+NODE_ENV=development pnpm --config.engine-strict=true install --frozen-lockfile --ignore-scripts
+echo "Dependencies ready in $((SECONDS - started))s"
+
+echo "Checking native prerequisites"
+node --input-type=module -e 'import "node:sqlite"; import "@signalapp/libsignal-client";'
+echo "Orb setup finished in ${SECONDS}s"
